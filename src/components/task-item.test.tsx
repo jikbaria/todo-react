@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TaskItem } from "./task-item";
 import type { Task } from "@/types/task";
@@ -14,7 +14,9 @@ describe("TaskItem", () => {
       description: "Cover components and hooks",
     });
 
-    render(<TaskItem task={task} onTaskUpdate={() => {}} />);
+    render(
+      <TaskItem task={task} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+    );
 
     expect(screen.getByText(task.title)).toBeInTheDocument();
     expect(screen.getByText(task.description)).toBeInTheDocument();
@@ -27,7 +29,13 @@ describe("TaskItem", () => {
     });
 
     const onTaskUpdate = vi.fn();
-    render(<TaskItem task={task} onTaskUpdate={onTaskUpdate} />);
+    render(
+      <TaskItem
+        task={task}
+        onTaskUpdate={onTaskUpdate}
+        onTaskDelete={() => {}}
+      />
+    );
 
     const user = userEvent.setup();
 
@@ -50,7 +58,13 @@ describe("TaskItem", () => {
       status: "done",
     });
 
-    render(<TaskItem task={doneTask} onTaskUpdate={() => {}} />);
+    render(
+      <TaskItem
+        task={doneTask}
+        onTaskUpdate={() => {}}
+        onTaskDelete={() => {}}
+      />
+    );
 
     expect(
       screen.getByRole("checkbox", { name: /mark as completed/i })
@@ -63,7 +77,13 @@ describe("TaskItem", () => {
     });
 
     const onTaskUpdate = vi.fn();
-    render(<TaskItem task={task} onTaskUpdate={onTaskUpdate} />);
+    render(
+      <TaskItem
+        task={task}
+        onTaskUpdate={onTaskUpdate}
+        onTaskDelete={() => {}}
+      />
+    );
 
     const user = userEvent.setup();
 
@@ -87,7 +107,9 @@ describe("TaskItem", () => {
     const dueDate = futureDate.toISOString();
     const task = createTask({ dueDate, title: "Has due date" });
 
-    render(<TaskItem task={task} onTaskUpdate={() => {}} />);
+    render(
+      <TaskItem task={task} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+    );
 
     const expectedLabel = formatDueDate(dueDate);
     expect(screen.getByText(expectedLabel)).toBeInTheDocument();
@@ -99,7 +121,9 @@ describe("TaskItem", () => {
     const pastDue = subDays(startOfDay(baseNow), 1).toISOString();
     const task = createTask({ dueDate: pastDue, title: "Overdue task" });
 
-    render(<TaskItem task={task} onTaskUpdate={() => {}} />);
+    render(
+      <TaskItem task={task} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+    );
 
     const label = screen.getByText(formatDueDate(pastDue));
     expect(label).toHaveAttribute("data-overdue", "true");
@@ -111,9 +135,67 @@ describe("TaskItem", () => {
     const futureDue = addDays(startOfDay(baseNow), 30).toISOString();
     const task = createTask({ dueDate: futureDue, title: "Future task" });
 
-    render(<TaskItem task={task} onTaskUpdate={() => {}} />);
+    render(
+      <TaskItem task={task} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+    );
 
     const label = screen.getByText(formatDueDate(futureDue));
     expect(label).toHaveAttribute("data-overdue", "false");
+  });
+
+  it("opens delete confirmation and calls onTaskDelete on confirm", async () => {
+    const task = createTask({ title: "Delete me" });
+
+    const onTaskDelete = vi.fn();
+    render(
+      <TaskItem
+        task={task}
+        onTaskUpdate={() => {}}
+        onTaskDelete={onTaskDelete}
+      />
+    );
+
+    const user = userEvent.setup();
+
+    // Open dialog via the trash trigger button
+    await user.click(
+      screen.getByRole("button", {
+        name: /delete/i,
+        hidden: true,
+      })
+    );
+
+    // Confirm deletion
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: /delete/i }));
+
+    expect(onTaskDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not delete when canceled", async () => {
+    const task = createTask({ title: "Keep me" });
+
+    const onTaskDelete = vi.fn();
+    render(
+      <TaskItem
+        task={task}
+        onTaskUpdate={() => {}}
+        onTaskDelete={onTaskDelete}
+      />
+    );
+
+    const user = userEvent.setup();
+
+    // Open dialog via the trash trigger button
+    await user.click(
+      screen.getByRole("button", {
+        name: /delete/i,
+        hidden: true,
+      })
+    );
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: /cancel/i }));
+
+    expect(onTaskDelete).not.toHaveBeenCalled();
   });
 });

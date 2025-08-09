@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TaskList } from "./task-list";
 import type { Task } from "@/types/task";
@@ -19,8 +19,9 @@ describe("TaskList", () => {
         status: "todo",
       }),
     ];
-
-    render(<TaskList tasks={tasks} onTaskUpdate={() => {}} />);
+    render(
+      <TaskList tasks={tasks} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+    );
 
     expect(screen.getByText("Task A")).toBeInTheDocument();
     expect(screen.getByText("Task B")).toBeInTheDocument();
@@ -41,7 +42,13 @@ describe("TaskList", () => {
     ];
 
     const onTaskUpdate = vi.fn();
-    render(<TaskList tasks={tasks} onTaskUpdate={onTaskUpdate} />);
+    render(
+      <TaskList
+        tasks={tasks}
+        onTaskUpdate={onTaskUpdate}
+        onTaskDelete={() => {}}
+      />
+    );
 
     const user = userEvent.setup();
 
@@ -61,5 +68,35 @@ describe("TaskList", () => {
         status: "done",
       })
     );
+  });
+
+  it("call delete task", async () => {
+    const tasks: Task[] = [
+      createTask({ id: "t-1", title: "Remove me", status: "todo" }),
+      createTask({ id: "t-2", title: "B", status: "todo" }),
+    ];
+    const onTaskDelete = vi.fn();
+    render(
+      <TaskList
+        tasks={tasks}
+        onTaskUpdate={() => {}}
+        onTaskDelete={onTaskDelete}
+      />
+    );
+
+    const user = userEvent.setup();
+
+    // Open delete dialog within the row containing "Remove me"
+    const item = screen
+      .getAllByTestId("task-list-item")
+      .find((el) => within(el).queryByText("Remove me"));
+    await user.click(
+      within(item!).getByRole("button", { name: /delete task/i, hidden: true })
+    );
+
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: /delete/i }));
+
+    expect(onTaskDelete).toHaveBeenCalledWith("t-1");
   });
 });

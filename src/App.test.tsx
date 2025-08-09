@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 import type { Task } from "./types/task";
@@ -103,5 +103,34 @@ describe("App", () => {
     expect(screen.getByText("Future")).toBeInTheDocument();
     const futureLabel = screen.getByText(formatDueDate(future.dueDate!));
     expect(futureLabel).toHaveAttribute("data-overdue", "false");
+  });
+
+  it("deletes a task", async () => {
+    const toDelete = createTask({ id: "del-1", title: "Remove me" });
+    const toKeep = createTask({ id: "keep-1", title: "Keep me" });
+    seedLocal([toDelete, toKeep]);
+
+    render(<App />);
+
+    await screen.findByRole("heading", { name: /my tasks/i });
+
+    expect(screen.getByText("Remove me")).toBeInTheDocument();
+    expect(screen.getByText("Keep me")).toBeInTheDocument();
+
+    const user = userEvent.setup();
+
+    // Open delete dialog within the row containing "Remove me"
+    const item = screen
+      .getAllByTestId("task-list-item")
+      .find((el) => within(el).queryByText("Remove me"));
+    await user.click(
+      within(item!).getByRole("button", { name: /delete task/i, hidden: true })
+    );
+
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: /delete/i }));
+
+    expect(screen.queryByText("Remove me")).not.toBeInTheDocument();
+    expect(screen.getByText("Keep me")).toBeInTheDocument();
   });
 });
