@@ -3,13 +3,12 @@ import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { Button } from "./components/ui/button";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { AppLoader } from "./components/app-loader";
 import { TasksPage } from "./pages/tasks";
 
-const queryClient = new QueryClient();
-
 function App() {
+  const [queryClient] = useState(() => new QueryClient());
   return (
     <QueryClientProvider client={queryClient}>
       <QueryErrorResetBoundary>

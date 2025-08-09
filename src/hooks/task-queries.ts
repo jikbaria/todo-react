@@ -14,7 +14,8 @@ const taskQueryOptions = () =>
   queryOptions({
     queryKey: ["tasks"],
     queryFn: async () => {
-      return taskService.list();
+      const list = await taskService.list();
+      return list;
     },
   });
 
