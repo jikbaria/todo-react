@@ -3,6 +3,9 @@ import userEvent from "@testing-library/user-event";
 import App from "./App";
 import type { Task } from "./types/task";
 import { createTask } from "./test/utils";
+import { formatDueDate } from "./lib/utils";
+import { addDays, startOfDay, subDays } from "date-fns";
+import { STORAGE_KEY } from "./services/local-storage-service";
 
 describe("App", () => {
   it("renders main layout", async () => {
@@ -13,10 +16,8 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
-  const KEY = "todo.tasks.v1";
-
   const seedLocal = (tasks: Task[]) => {
-    localStorage.setItem(KEY, JSON.stringify(tasks));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   };
 
   it("loads persisted tasks and adds a task optimistically", async () => {
@@ -73,5 +74,34 @@ describe("App", () => {
     expect(
       screen.getByRole("checkbox", { name: /mark as completed/i })
     ).toBeChecked();
+  });
+
+  it("shows due date for tasks and marks overdue ones", async () => {
+    const baseNow = new Date();
+
+    const overdue = createTask({
+      title: "Overdue",
+      dueDate: subDays(startOfDay(baseNow), 3).toISOString(),
+    });
+    const future = createTask({
+      title: "Future",
+      dueDate: addDays(startOfDay(baseNow), 21).toISOString(),
+    });
+    seedLocal([overdue, future]);
+
+    render(<App />);
+
+    // Wait for app
+    await screen.findByRole("heading", { name: /my tasks/i });
+
+    // Overdue
+    expect(screen.getByText("Overdue")).toBeInTheDocument();
+    const overdueLabel = screen.getByText(formatDueDate(overdue.dueDate!));
+    expect(overdueLabel).toHaveAttribute("data-overdue", "true");
+
+    // Future
+    expect(screen.getByText("Future")).toBeInTheDocument();
+    const futureLabel = screen.getByText(formatDueDate(future.dueDate!));
+    expect(futureLabel).toHaveAttribute("data-overdue", "false");
   });
 });

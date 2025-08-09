@@ -1,9 +1,11 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "./ui/button";
 import type { TaskDraft } from "@/types/task";
+import { DueDatePicker } from "./due-date-picker";
 
 const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
   const titleRef = useRef<HTMLTextAreaElement>(null!);
+  const [dueDate, setDueDate] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -15,7 +17,7 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
       title,
       description: description ?? "",
       status: "todo",
-      dueDate: null,
+      dueDate: dueDate,
     };
 
     onSubmit(draft);
@@ -23,11 +25,11 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
     // clear the form
     form.reset();
     titleRef.current.focus();
+    autoResize(titleRef.current);
   };
-  const autoResize = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const textarea = e.target as HTMLTextAreaElement;
-    textarea.style.height = "auto"; // Reset height to recalculate
-    textarea.style.height = textarea.scrollHeight + "px";
+  const autoResize = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto"; // Reset height to recalculate
+    el.style.height = el.scrollHeight + "px";
   };
   return (
     <form
@@ -41,7 +43,7 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
           aria-label="Title"
           required
           ref={titleRef}
-          onInput={autoResize}
+          onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
           autoFocus
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -59,7 +61,7 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
           className="resize-none text-base font-semibold text-primary outline-none placeholder:text-muted-foreground"
         />
         <textarea
-          onInput={autoResize}
+          onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
           name="description"
           rows={1}
           aria-label="Description"
@@ -67,7 +69,8 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
           className="resize-none text-base text-primary outline-none placeholder:text-muted-foreground"
         />
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <DueDatePicker value={dueDate} onChange={setDueDate} />
         <Button type="submit">Add</Button>
       </div>
     </form>

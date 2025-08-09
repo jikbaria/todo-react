@@ -18,19 +18,19 @@ const TaskList = ({
   const completedTasks = tasks.filter((task) => task.status === "done");
   return (
     <div>
-      <div className="flex flex-col divide-y">
+      <div className="flex flex-col *:border-b">
         {pendingTasks.map((task) => (
           <TaskItem key={task.id} task={task} onTaskUpdate={onTaskUpdate} />
         ))}
       </div>
       {completedTasks.length > 0 && (
-        <Collapsible className="flex flex-col gap-2 mt-4">
+        <Collapsible className="flex flex-col gap-2 mt-2">
           <CollapsibleTrigger className="flex group items-center gap-2">
             <ChevronRight className="size-5 group-data-[state=open]:rotate-90" />
             <h4 className="text-base font-semibold">Completed Tasks</h4>
           </CollapsibleTrigger>
 
-          <CollapsibleContent className="flex flex-col divide-y">
+          <CollapsibleContent className="flex flex-col *:border-b">
             {completedTasks.map((task) => (
               <TaskItem key={task.id} task={task} onTaskUpdate={onTaskUpdate} />
             ))}
