@@ -1,16 +1,16 @@
 import type { Task, TaskDraft } from "../types/task";
 import type { TaskService } from "./task-service";
 
-const KEY = "todo.tasks.v1";
+export const STORAGE_KEY = "todo.tasks.v1";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class LocalTaskService implements TaskService {
   private load(): Task[] {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   }
   private save(tasks: Task[]) {
-    localStorage.setItem(KEY, JSON.stringify(tasks));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }
   async list() {
     await sleep(500);

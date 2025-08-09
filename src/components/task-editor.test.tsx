@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TaskEditor } from "./task-editor";
 import { vi } from "vitest";
+import { addDays, format, startOfDay } from "date-fns";
 
 describe("TaskEditor", () => {
   it("renders inputs and submit button", () => {
@@ -56,6 +57,41 @@ describe("TaskEditor", () => {
         description: "",
         status: "todo",
       })
+    );
+  });
+
+  it("allows picking a due date and submits it", async () => {
+    const baseNow = new Date("2025-08-09T12:00:00.000Z");
+    vi.setSystemTime(baseNow);
+
+    const onSubmit = vi.fn();
+    render(<TaskEditor onSubmit={onSubmit} />);
+
+    const user = userEvent.setup();
+
+    // Open the due date picker
+    const openBtn = screen.getByRole("button", { name: /set due date/i });
+    await user.click(openBtn);
+
+    // Pick a future date: 6 days from today
+    const target = addDays(startOfDay(baseNow), 6);
+    const dialog = await screen.findByRole("dialog");
+    const dayEl = within(dialog).getByText(String(target.getDate()));
+
+    await user.click(dayEl.closest("button")!);
+
+    // Fill title and submit
+    await user.type(screen.getByLabelText("Title"), "Task with due date 1234");
+    await user.click(screen.getByRole("button", { name: /add/i }));
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    const submitted = onSubmit.mock.calls[0][0];
+    expect(submitted.title).toBe("Task with due date 1234");
+    expect(submitted.status).toBe("todo");
+    // ensure it parses to the selected day
+    const submittedDate = new Date(submitted.dueDate);
+    expect(format(submittedDate, "yyyy-MM-dd")).toBe(
+      format(target, "yyyy-MM-dd")
     );
   });
 });

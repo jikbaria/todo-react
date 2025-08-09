@@ -3,6 +3,9 @@ import userEvent from "@testing-library/user-event";
 import { TaskItem } from "./task-item";
 import type { Task } from "@/types/task";
 import { createTask } from "@/test/utils";
+import { formatDueDate } from "@/lib/utils";
+import { vi } from "vitest";
+import { addDays, startOfDay, subDays } from "date-fns";
 
 describe("TaskItem", () => {
   it("renders title and description", () => {
@@ -74,5 +77,43 @@ describe("TaskItem", () => {
     expect(onTaskUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ id: task.id, status: "todo" })
     );
+  });
+
+  it("renders formatted due date text when dueDate is present", () => {
+    const baseNow = new Date();
+
+    const futureDate = addDays(startOfDay(baseNow), 6);
+
+    const dueDate = futureDate.toISOString();
+    const task = createTask({ dueDate, title: "Has due date" });
+
+    render(<TaskItem task={task} onTaskUpdate={() => {}} />);
+
+    const expectedLabel = formatDueDate(dueDate);
+    expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+  });
+
+  it("marks task as overdue when due date is in the past", () => {
+    const baseNow = new Date();
+
+    const pastDue = subDays(startOfDay(baseNow), 1).toISOString();
+    const task = createTask({ dueDate: pastDue, title: "Overdue task" });
+
+    render(<TaskItem task={task} onTaskUpdate={() => {}} />);
+
+    const label = screen.getByText(formatDueDate(pastDue));
+    expect(label).toHaveAttribute("data-overdue", "true");
+  });
+
+  it("does not mark task as overdue for today or future dates", () => {
+    const baseNow = new Date();
+
+    const futureDue = addDays(startOfDay(baseNow), 30).toISOString();
+    const task = createTask({ dueDate: futureDue, title: "Future task" });
+
+    render(<TaskItem task={task} onTaskUpdate={() => {}} />);
+
+    const label = screen.getByText(formatDueDate(futureDue));
+    expect(label).toHaveAttribute("data-overdue", "false");
   });
 });
