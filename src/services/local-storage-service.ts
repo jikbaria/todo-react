@@ -13,14 +13,14 @@ export class LocalTaskService implements TaskService {
     localStorage.setItem(KEY, JSON.stringify(tasks));
   }
   async list() {
-    await sleep(1000);
+    await sleep(500);
     return {
       tasks: this.load(),
     };
   }
 
   async create(draft: TaskDraft) {
-    await sleep(1000);
+    await sleep(500);
     const now = new Date().toISOString();
     const task: Task = {
       id: crypto.randomUUID(),
@@ -28,14 +28,13 @@ export class LocalTaskService implements TaskService {
       updatedAt: now,
       ...draft,
     };
-    console.log("create", this);
     const tasks = this.load();
     tasks.unshift(task);
     this.save(tasks);
     return task;
   }
   async update(id: string, update: Partial<TaskDraft>) {
-    await sleep(1000);
+    await sleep(500);
     const tasks = this.load();
     const i = tasks.findIndex((t) => t.id === id);
     if (i === -1) throw new Error("Not found");
@@ -44,7 +43,7 @@ export class LocalTaskService implements TaskService {
     return tasks[i];
   }
   async delete(id: string) {
-    await sleep(1000);
+    await sleep(500);
     this.save(this.load().filter((t) => t.id !== id));
   }
 }

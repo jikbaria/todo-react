@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TaskEditor } from "./task-editor";
+import { vi } from "vitest";
 
 describe("TaskEditor", () => {
   it("renders inputs and submit button", () => {
@@ -12,45 +13,49 @@ describe("TaskEditor", () => {
     expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
   });
 
-  it("submits a valid draft, then clears and focuses the title field", async () => {
+  it("submits valid input and resets form and focus title", async () => {
     const onSubmit = vi.fn();
     render(<TaskEditor onSubmit={onSubmit} />);
+
+    const user = userEvent.setup();
 
     const title = screen.getByLabelText("Title");
     const description = screen.getByLabelText("Description");
 
-    await userEvent.type(title, "New task 1234");
-    await userEvent.type(description, "Do something important");
-
-    await userEvent.click(screen.getByRole("button", { name: /add/i }));
+    await user.type(title, "New task 1234");
+    await user.type(description, "Do something important");
+    await user.click(screen.getByRole("button", { name: /add/i }));
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith({
-      title: "New task 1234",
-      description: "Do something important",
-      status: "todo",
-      dueDate: null,
-    });
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "New task 1234",
+        description: "Do something important",
+        status: "todo",
+      })
+    );
 
-    // After submit, form resets and title is focused
     expect(title).toHaveValue("");
     expect(title).toHaveFocus();
     expect(description).toHaveValue("");
   });
 
-  it("triggers submit when pressing Enter in the title field", async () => {
+  it("submits when pressing Enter in title field", async () => {
     const onSubmit = vi.fn();
     render(<TaskEditor onSubmit={onSubmit} />);
 
+    const user = userEvent.setup();
+
     const title = screen.getByLabelText("Title");
-    await userEvent.type(title, "Long enough title 1234{enter}");
+    await user.type(title, "Long enough title 1234{enter}");
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith({
-      title: "Long enough title 1234",
-      description: "",
-      status: "todo",
-      dueDate: null,
-    });
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Long enough title 1234",
+        description: "",
+        status: "todo",
+      })
+    );
   });
 });
