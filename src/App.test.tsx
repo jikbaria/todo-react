@@ -120,11 +120,12 @@ describe("App", () => {
     const user = userEvent.setup();
 
     // Open delete dialog within the row containing "Remove me"
-    const item = screen
-      .getAllByTestId("task-list-item")
-      .find((el) => within(el).queryByText("Remove me"));
+    const item = screen.getByRole("button", {
+      name: /Remove me/i,
+    });
+
     await user.click(
-      within(item!).getByRole("button", { name: /delete task/i, hidden: true })
+      within(item).getByRole("button", { name: /delete task/i, hidden: true })
     );
 
     const dialog = await screen.findByRole("alertdialog");
@@ -132,5 +133,69 @@ describe("App", () => {
 
     expect(screen.queryByText("Remove me")).not.toBeInTheDocument();
     expect(screen.getByText("Keep me")).toBeInTheDocument();
+  });
+
+  it("enters edit mode when clicking a task and hides the add editor", async () => {
+    const t = createTask({ id: "e-11", title: "Click me to edit" });
+    seedLocal([t]);
+
+    render(<App />);
+    await screen.findByRole("heading", { name: /my tasks/i });
+
+    const user = userEvent.setup();
+    // Add editor is shown initially
+    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+
+    // Click the row to edit
+    await user.click(screen.getByRole("button", { name: /click me to edit/i }));
+
+    // Now the inline editor appears and the top add editor hides
+    expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /add/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("saves edits and exits edit mode", async () => {
+    const t = createTask({ id: "e-12", title: "Old title 123456" });
+    seedLocal([t]);
+
+    render(<App />);
+    await screen.findByRole("heading", { name: /my tasks/i });
+    const user = userEvent.setup();
+
+    // Enter edit mode
+    await user.click(screen.getByRole("button", { name: /old title 123456/i }));
+    const title = screen.getByLabelText(/title/i);
+    await user.clear(title);
+    await user.type(title, "New edited title 123456");
+    await user.click(screen.getByRole("button", { name: /save/i }));
+
+    // Back to list item view with updated title
+    expect(
+      await screen.findByText(/new edited title 123456/i)
+    ).toBeInTheDocument();
+    // Add editor visible again
+    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+  });
+
+  it("cancels edit and restores view without changing", async () => {
+    const t = createTask({ id: "e-13", title: "Stay same 123456" });
+    seedLocal([t]);
+
+    render(<App />);
+    await screen.findByRole("heading", { name: /my tasks/i });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: /stay same 123456/i }));
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /cancel/i }));
+
+    // Should render item again with original title
+    expect(
+      screen.getByRole("button", { name: /stay same 123456/i })
+    ).toBeInTheDocument();
+    // Add editor visible again
+    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
   });
 });

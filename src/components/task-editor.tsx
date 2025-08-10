@@ -3,9 +3,29 @@ import { Button } from "./ui/button";
 import type { TaskDraft } from "@/types/task";
 import { DueDatePicker } from "./due-date-picker";
 
-const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
-  const titleRef = useRef<HTMLTextAreaElement>(null!);
-  const [dueDate, setDueDate] = useState<string | null>(null);
+type BaseProps = {
+  onSubmit: (draft: TaskDraft) => void;
+  defaultValues?: Partial<TaskDraft>;
+};
+type AddProps = BaseProps & {
+  variant?: "add";
+  onCancel?: undefined;
+};
+type EditProps = BaseProps & {
+  variant: "edit";
+  onCancel: () => void;
+};
+type Props = AddProps | EditProps;
+const TaskEditor = ({
+  onSubmit,
+  variant = "add",
+  onCancel,
+  defaultValues = {},
+}: Props) => {
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+  const [dueDate, setDueDate] = useState<string | null>(
+    defaultValues.dueDate ?? null
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,8 +44,9 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
 
     // clear the form
     form.reset();
-    titleRef.current.focus();
-    autoResize(titleRef.current);
+
+    titleRef.current!.focus();
+    autoResize(titleRef.current!);
   };
   const autoResize = (el: HTMLTextAreaElement) => {
     el.style.height = "auto"; // Reset height to recalculate
@@ -40,9 +61,15 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
         <textarea
           name="title"
           rows={1}
+          defaultValue={defaultValues.title}
           aria-label="Title"
           required
-          ref={titleRef}
+          ref={(ref) => {
+            if (ref) {
+              autoResize(ref);
+            }
+            titleRef.current = ref;
+          }}
           onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
           autoFocus
           onKeyDown={(e) => {
@@ -61,6 +88,7 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
           className="resize-none text-base font-semibold text-primary outline-none placeholder:text-muted-foreground"
         />
         <textarea
+          defaultValue={defaultValues.description}
           onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
           name="description"
           rows={1}
@@ -71,7 +99,14 @@ const TaskEditor = ({ onSubmit }: { onSubmit: (draft: TaskDraft) => void }) => {
       </div>
       <div className="flex justify-between">
         <DueDatePicker value={dueDate} onChange={setDueDate} />
-        <Button type="submit">Add</Button>
+        <div className="flex gap-2">
+          {variant === "edit" && (
+            <Button type="button" variant="secondary" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+          <Button type="submit">{variant === "add" ? "Add" : "Save"}</Button>
+        </div>
       </div>
     </form>
   );
