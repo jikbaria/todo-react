@@ -37,7 +37,7 @@ pnpm preview        # preview production build
 
 ### Roadmap
 
-- [ ] Local-only MVP complete
+- [x] Local-only MVP complete
 - [ ] Backend API with auth
 - [ ] Frontend integration with API
 - [ ] Polish and deploy
