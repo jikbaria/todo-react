@@ -10,9 +10,11 @@ import { ChevronRight } from "lucide-react";
 const TaskList = ({
   tasks,
   onTaskUpdate,
+  onTaskDelete,
 }: {
   tasks: Task[];
   onTaskUpdate: (task: Task) => void;
+  onTaskDelete: (taskId: string) => void;
 }) => {
   const pendingTasks = tasks.filter((task) => task.status === "todo");
   const completedTasks = tasks.filter((task) => task.status === "done");
@@ -20,7 +22,12 @@ const TaskList = ({
     <div>
       <div className="flex flex-col *:border-b">
         {pendingTasks.map((task) => (
-          <TaskItem key={task.id} task={task} onTaskUpdate={onTaskUpdate} />
+          <TaskItem
+            key={task.id}
+            task={task}
+            onTaskUpdate={onTaskUpdate}
+            onTaskDelete={() => onTaskDelete(task.id)}
+          />
         ))}
       </div>
       {completedTasks.length > 0 && (
@@ -32,7 +39,12 @@ const TaskList = ({
 
           <CollapsibleContent className="flex flex-col *:border-b">
             {completedTasks.map((task) => (
-              <TaskItem key={task.id} task={task} onTaskUpdate={onTaskUpdate} />
+              <TaskItem
+                key={task.id}
+                task={task}
+                onTaskUpdate={onTaskUpdate}
+                onTaskDelete={() => onTaskDelete(task.id)}
+              />
             ))}
           </CollapsibleContent>
         </Collapsible>
