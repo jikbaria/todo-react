@@ -94,4 +94,41 @@ describe("TaskEditor", () => {
       format(target, "yyyy-MM-dd")
     );
   });
+
+  it("shows default values and Cancel/Save in edit variant", async () => {
+    const onSubmit = vi.fn();
+    const onCancel = vi.fn();
+    render(
+      <TaskEditor
+        variant="edit"
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        defaultValues={{ title: "Existing title 123456", description: "Desc" }}
+      />
+    );
+
+    expect(
+      screen.getByDisplayValue(/existing title 123456/i)
+    ).toBeInTheDocument();
+    expect(screen.getByDisplayValue(/desc/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+  });
+
+  it("calls onCancel in edit variant", async () => {
+    const onSubmit = vi.fn();
+    const onCancel = vi.fn();
+    render(
+      <TaskEditor
+        variant="edit"
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        defaultValues={{ title: "Cancelable 123456" }}
+      />
+    );
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /cancel/i }));
+    expect(onCancel).toHaveBeenCalled();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
 });

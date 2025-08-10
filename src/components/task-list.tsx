@@ -6,29 +6,51 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { ChevronRight } from "lucide-react";
+import { TaskEditor } from "./task-editor";
 
 const TaskList = ({
   tasks,
   onTaskUpdate,
   onTaskDelete,
+  onEditClick,
+  editingTaskId,
 }: {
   tasks: Task[];
   onTaskUpdate: (task: Task) => void;
   onTaskDelete: (taskId: string) => void;
+  onEditClick: (taskId: string | null) => void;
+  editingTaskId: string | null;
 }) => {
   const pendingTasks = tasks.filter((task) => task.status === "todo");
   const completedTasks = tasks.filter((task) => task.status === "done");
   return (
     <div>
       <div className="flex flex-col *:border-b">
-        {pendingTasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            onTaskUpdate={onTaskUpdate}
-            onTaskDelete={() => onTaskDelete(task.id)}
-          />
-        ))}
+        {pendingTasks.map((task) => {
+          if (task.id === editingTaskId) {
+            return (
+              <TaskEditor
+                key={task.id}
+                defaultValues={task}
+                onCancel={() => onEditClick(null)}
+                variant="edit"
+                onSubmit={(updated) => {
+                  onTaskUpdate({ ...task, ...updated });
+                  onEditClick(null);
+                }}
+              />
+            );
+          }
+          return (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onTaskUpdate={onTaskUpdate}
+              onTaskDelete={() => onTaskDelete(task.id)}
+              onEditClick={() => onEditClick(task.id)}
+            />
+          );
+        })}
       </div>
       {completedTasks.length > 0 && (
         <Collapsible className="flex flex-col gap-2 mt-2">
@@ -38,14 +60,31 @@ const TaskList = ({
           </CollapsibleTrigger>
 
           <CollapsibleContent className="flex flex-col *:border-b">
-            {completedTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onTaskUpdate={onTaskUpdate}
-                onTaskDelete={() => onTaskDelete(task.id)}
-              />
-            ))}
+            {completedTasks.map((task) => {
+              if (task.id === editingTaskId) {
+                return (
+                  <TaskEditor
+                    key={task.id}
+                    defaultValues={task}
+                    onCancel={() => onEditClick(null)}
+                    variant="edit"
+                    onSubmit={(updated) => {
+                      onTaskUpdate({ ...task, ...updated });
+                      onEditClick(null);
+                    }}
+                  />
+                );
+              }
+              return (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onTaskUpdate={onTaskUpdate}
+                  onTaskDelete={() => onTaskDelete(task.id)}
+                  onEditClick={() => onEditClick(task.id)}
+                />
+              );
+            })}
           </CollapsibleContent>
         </Collapsible>
       )}

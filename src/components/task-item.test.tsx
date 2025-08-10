@@ -15,7 +15,12 @@ describe("TaskItem", () => {
     });
 
     render(
-      <TaskItem task={task} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+      <TaskItem
+        task={task}
+        onTaskUpdate={() => {}}
+        onTaskDelete={() => {}}
+        onEditClick={() => {}}
+      />
     );
 
     expect(screen.getByText(task.title)).toBeInTheDocument();
@@ -34,6 +39,7 @@ describe("TaskItem", () => {
         task={task}
         onTaskUpdate={onTaskUpdate}
         onTaskDelete={() => {}}
+        onEditClick={() => {}}
       />
     );
 
@@ -63,6 +69,7 @@ describe("TaskItem", () => {
         task={doneTask}
         onTaskUpdate={() => {}}
         onTaskDelete={() => {}}
+        onEditClick={() => {}}
       />
     );
 
@@ -82,6 +89,7 @@ describe("TaskItem", () => {
         task={task}
         onTaskUpdate={onTaskUpdate}
         onTaskDelete={() => {}}
+        onEditClick={() => {}}
       />
     );
 
@@ -108,7 +116,12 @@ describe("TaskItem", () => {
     const task = createTask({ dueDate, title: "Has due date" });
 
     render(
-      <TaskItem task={task} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+      <TaskItem
+        task={task}
+        onTaskUpdate={() => {}}
+        onTaskDelete={() => {}}
+        onEditClick={() => {}}
+      />
     );
 
     const expectedLabel = formatDueDate(dueDate);
@@ -122,7 +135,12 @@ describe("TaskItem", () => {
     const task = createTask({ dueDate: pastDue, title: "Overdue task" });
 
     render(
-      <TaskItem task={task} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+      <TaskItem
+        task={task}
+        onTaskUpdate={() => {}}
+        onTaskDelete={() => {}}
+        onEditClick={() => {}}
+      />
     );
 
     const label = screen.getByText(formatDueDate(pastDue));
@@ -136,7 +154,12 @@ describe("TaskItem", () => {
     const task = createTask({ dueDate: futureDue, title: "Future task" });
 
     render(
-      <TaskItem task={task} onTaskUpdate={() => {}} onTaskDelete={() => {}} />
+      <TaskItem
+        task={task}
+        onTaskUpdate={() => {}}
+        onTaskDelete={() => {}}
+        onEditClick={() => {}}
+      />
     );
 
     const label = screen.getByText(formatDueDate(futureDue));
@@ -152,6 +175,7 @@ describe("TaskItem", () => {
         task={task}
         onTaskUpdate={() => {}}
         onTaskDelete={onTaskDelete}
+        onEditClick={() => {}}
       />
     );
 
@@ -160,7 +184,7 @@ describe("TaskItem", () => {
     // Open dialog via the trash trigger button
     await user.click(
       screen.getByRole("button", {
-        name: /delete/i,
+        name: /delete task/i,
         hidden: true,
       })
     );
@@ -181,6 +205,7 @@ describe("TaskItem", () => {
         task={task}
         onTaskUpdate={() => {}}
         onTaskDelete={onTaskDelete}
+        onEditClick={() => {}}
       />
     );
 
@@ -197,5 +222,26 @@ describe("TaskItem", () => {
     await user.click(within(dialog).getByRole("button", { name: /cancel/i }));
 
     expect(onTaskDelete).not.toHaveBeenCalled();
+  });
+
+  it("calls onEditClick when the row is clicked", async () => {
+    const task = createTask({ title: "Click to edit 123456" });
+    const onEditClick = vi.fn();
+
+    render(
+      <TaskItem
+        task={task}
+        onTaskUpdate={() => {}}
+        onTaskDelete={() => {}}
+        onEditClick={onEditClick}
+      />
+    );
+
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: /click to edit 123456/i })
+    );
+
+    expect(onEditClick).toHaveBeenCalledTimes(1);
   });
 });

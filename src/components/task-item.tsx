@@ -21,23 +21,33 @@ const TaskItem = ({
   task,
   onTaskUpdate,
   onTaskDelete,
+  onEditClick,
 }: {
   task: Task;
   onTaskUpdate: (task: Task) => void;
   onTaskDelete: () => void;
+  onEditClick: () => void;
 }) => {
   const dueDate = task.dueDate;
   return (
     <div
-      className="pt-2 pb-3 flex gap-2 group w-full"
+      className="pt-2 pb-3 flex gap-2 group w-full cursor-pointer"
       data-testid="task-list-item"
+      role="button"
+      onClick={() => {
+        onEditClick();
+      }}
     >
       <Checkbox
         className="mt-1"
         checked={task.status === "done"}
-        onCheckedChange={(checked) =>
-          onTaskUpdate({ ...task, status: checked ? "done" : "todo" })
-        }
+        onCheckedChange={(checked) => {
+          onTaskUpdate({ ...task, status: checked ? "done" : "todo" });
+        }}
+        onClick={(e) => {
+          // Prevent click from propagating to the parent div
+          e.stopPropagation();
+        }}
         aria-label="Mark as completed"
       />
       <div className="flex gap-2 flex-1">
@@ -78,17 +88,17 @@ const TaskItem = ({
           )}
         </div>
         <AlertDialog>
-          <AlertDialogTrigger asChild>
+          <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
             <Button
               variant="ghost"
               size="icon"
               aria-label="Delete task"
-              className="-mt-1 invisible group-hover:visible"
+              className="-mt-1 invisible group-hover:visible transition-none"
             >
               <Trash2 />
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete task?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -97,7 +107,12 @@ const TaskItem = ({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={onTaskDelete} asChild>
+              <AlertDialogAction
+                onClick={() => {
+                  onTaskDelete();
+                }}
+                asChild
+              >
                 <Button variant="destructive">Delete</Button>
               </AlertDialogAction>
             </AlertDialogFooter>
