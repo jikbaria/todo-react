@@ -5,6 +5,6 @@ export interface TaskService {
     tasks: Task[];
   }>;
   create(draft: TaskDraft): Promise<Task>;
-  update(id: string, update: Partial<TaskDraft>): Promise<Task>;
+  update(id: string, update: TaskDraft): Promise<Task>;
   delete(id: string): Promise<void>;
 }

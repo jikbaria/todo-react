@@ -1,11 +1,10 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
-import type { Task } from "./types/task";
 import { createTask } from "./test/utils";
 import { formatDueDate } from "./lib/utils";
 import { addDays, startOfDay, subDays } from "date-fns";
-import { STORAGE_KEY } from "./services/local-storage-service";
+import { seedTasks } from "./test/mocks/db";
 
 describe("App", () => {
   it("renders main layout", async () => {
@@ -16,12 +15,8 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
-  const seedLocal = (tasks: Task[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  };
-
   it("loads persisted tasks and adds a task optimistically", async () => {
-    seedLocal([
+    seedTasks([
       createTask({
         title: "Seeded task",
       }),
@@ -52,7 +47,7 @@ describe("App", () => {
       id: "seed-2",
       title: "Finish docs",
     });
-    seedLocal([seeded]);
+    seedTasks([seeded]);
 
     render(<App />);
 
@@ -87,7 +82,7 @@ describe("App", () => {
       title: "Future",
       dueDate: addDays(startOfDay(baseNow), 21).toISOString(),
     });
-    seedLocal([overdue, future]);
+    seedTasks([overdue, future]);
 
     render(<App />);
 
@@ -108,7 +103,7 @@ describe("App", () => {
   it("deletes a task", async () => {
     const toDelete = createTask({ id: "del-1", title: "Remove me" });
     const toKeep = createTask({ id: "keep-1", title: "Keep me" });
-    seedLocal([toDelete, toKeep]);
+    seedTasks([toDelete, toKeep]);
 
     render(<App />);
 
@@ -137,7 +132,7 @@ describe("App", () => {
 
   it("enters edit mode when clicking a task and hides the add editor", async () => {
     const t = createTask({ id: "e-11", title: "Click me to edit" });
-    seedLocal([t]);
+    seedTasks([t]);
 
     render(<App />);
     await screen.findByRole("heading", { name: /my tasks/i });
@@ -158,7 +153,7 @@ describe("App", () => {
 
   it("saves edits and exits edit mode", async () => {
     const t = createTask({ id: "e-12", title: "Old title 123456" });
-    seedLocal([t]);
+    seedTasks([t]);
 
     render(<App />);
     await screen.findByRole("heading", { name: /my tasks/i });
@@ -181,7 +176,7 @@ describe("App", () => {
 
   it("cancels edit and restores view without changing", async () => {
     const t = createTask({ id: "e-13", title: "Stay same 123456" });
-    seedLocal([t]);
+    seedTasks([t]);
 
     render(<App />);
     await screen.findByRole("heading", { name: /my tasks/i });

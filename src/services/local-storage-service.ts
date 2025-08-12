@@ -33,7 +33,7 @@ export class LocalTaskService implements TaskService {
     this.save(tasks);
     return task;
   }
-  async update(id: string, update: Partial<TaskDraft>) {
+  async update(id: string, update: TaskDraft) {
     await sleep(500);
     const tasks = this.load();
     const i = tasks.findIndex((t) => t.id === id);
