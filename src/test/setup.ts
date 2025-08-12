@@ -1,15 +1,20 @@
 import "@testing-library/jest-dom/vitest";
-import { afterEach, beforeEach, vi } from "vitest";
+import { afterEach, beforeAll, afterAll } from "vitest";
 import { cleanup } from "@testing-library/react";
+import { resetDb } from "./mocks/db";
+import { server } from "./mocks/server";
 
-beforeEach(() => {
-  // mock timers
-  vi.useFakeTimers({
-    shouldAdvanceTime: true,
-  });
-});
+beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
+
 afterEach(() => {
   cleanup();
-  vi.useRealTimers();
   localStorage.clear();
+  server.resetHandlers();
+  resetDb();
 });
+
+afterEach(() => {
+  server.resetHandlers();
+  resetDb();
+});
+afterAll(() => server.close());
