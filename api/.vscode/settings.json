@@ -1,0 +1,5 @@
+{
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "bin/Release/net9.0/publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/5aa789ba-5b03-4ed2-80bb-bb47fede4682/resourceGroups/appsvc_windows_germanywestcentral/providers/Microsoft.Web/sites/todo-app"
+}

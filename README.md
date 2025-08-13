@@ -1,12 +1,12 @@
 ### Todo List App (React + TypeScript + Vite + ASP.NET Core)
 
-A Todo app built in phases: start with a local-only React frontend, then add a C# ASP.NET Core API with SQL and auth.
+A Todo app built in phases: start with a local-only React frontend, then add a C# ASP.NET Core API with SQL.
 
 ### Features
 
 - **Tasks**: title, description, status, due date
 - **CRUD**: create, edit, delete, list
-- **Storage**: localStorage (MVP); API + SQL + auth (planned)
+- **Storage**: localStorage (MVP); API + SQL
 
 ### Tech Stack
 
@@ -38,6 +38,6 @@ pnpm preview        # preview production build
 ### Roadmap
 
 - [x] Local-only MVP complete
-- [ ] Backend API with auth
-- [ ] Frontend integration with API
+- [x] Backend API
+- [] Frontend integration with API
 - [ ] Polish and deploy
