@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { isBefore, startOfDay } from "date-fns";
+import { isBefore, startOfDay, format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ export function DueDatePicker({
             }}
             startMonth={new Date()}
             onSelect={(date) => {
-              onChange(date ? date.toISOString() : null);
+              onChange(date ? format(date, "yyyy-MM-dd") : null);
               setOpen(false);
             }}
           />
