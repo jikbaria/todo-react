@@ -31,7 +31,7 @@ const TaskItem = ({
   const dueDate = task.dueDate;
   return (
     <div
-      className="pt-2 pb-3 flex gap-2 group w-full cursor-pointer"
+      className="pt-2 pb-3 flex gap-2 w-full cursor-pointer"
       data-testid="task-list-item"
       role="button"
       onClick={() => {
@@ -93,7 +93,7 @@ const TaskItem = ({
               variant="ghost"
               size="icon"
               aria-label="Delete task"
-              className="-mt-1 invisible group-hover:visible transition-none"
+              className="-mt-1"
             >
               <Trash2 />
             </Button>

@@ -19,7 +19,7 @@ function App() {
               <AppError resetErrorBoundary={resetErrorBoundary} />
             )}
           >
-            <main className="mx-auto mt-12 max-w-2xl px-5">
+            <main className="mx-auto py-12 max-w-2xl px-5">
               <Suspense fallback={<AppLoader />}>
                 <TasksPage />
               </Suspense>
