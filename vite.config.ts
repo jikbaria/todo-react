@@ -17,14 +17,4 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
   },
-  server: {
-    proxy: {
-      "/api": {
-        target: "https://localhost:7071",
-        changeOrigin: true,
-        secure: false, // Accept self-signed certificates
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
-  },
 });
