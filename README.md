@@ -198,9 +198,9 @@ Open: http://localhost:5173
 
 ### 9.1 Component / Integration Tests (Vitest)
 
-- Component tests (`src/**/*.test.tsx`) using Vitest + React Testing Library
-- Network interactions mocked with MSW (`/src/test/mocks`)
-- Utilities for rendering in `test/utils.ts`
+- Component tests (`./src/**/*.test.tsx`) using Vitest + React Testing Library
+- Network interactions mocked with MSW (`./src/test/mocks`)
+- Utilities for rendering in `./src/test/utils.ts`
 - Focus: rendering correctness, mutation success
 
 ```bash
@@ -218,10 +218,14 @@ npm run test:watch     # watch mode
 cd api && dotnet watch run
 
 # Terminal 2: frontend
-pnpm dev
+npm run dev
 
 # Terminal 3: run E2E
-pnpm test:e2e
+
+# (First time only)
+# npx playwright install --with-deps
+
+npm run test:e2e
 ```
 
 ---
@@ -248,4 +252,4 @@ pnpm test:e2e
 2. Task View Page
 3. Backend integration tests
 4. Authentication
-5. Full offline first experience
+5. Full offline-first experience
