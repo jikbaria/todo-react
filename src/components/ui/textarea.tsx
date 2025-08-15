@@ -15,7 +15,7 @@ export function TextArea({
   return (
     <textarea
       className={cn(
-        "resize-none text-base font-semibold text-primary outline-none placeholder:text-muted-foreground",
+        "resize-none text-base text-primary outline-none placeholder:text-muted-foreground",
         className
       )}
       ref={mergeRefs([
