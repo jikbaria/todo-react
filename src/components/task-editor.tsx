@@ -6,6 +6,7 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormMessage } from "./ui/form-message";
 import { TextArea } from "./ui/textarea";
+import { useEffect } from "react";
 
 type BaseProps = {
   onSubmit: (draft: TaskDraft) => void;
@@ -47,18 +48,12 @@ const TaskEditor = ({
     dueDate: null,
   },
 }: Props) => {
-  const {
-    handleSubmit,
-    reset,
-    control,
-    register,
-    setFocus,
-    formState: { errors },
-  } = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues,
-  });
-
+  const { handleSubmit, reset, control, register, setFocus, formState } =
+    useForm<z.infer<typeof FormSchema>>({
+      resolver: zodResolver(FormSchema),
+      defaultValues,
+    });
+  const { errors, isSubmitSuccessful } = formState;
   const handleTaskSubmit = (data: z.infer<typeof FormSchema>) => {
     const draft: TaskDraft = {
       title: data.title,
@@ -67,12 +62,14 @@ const TaskEditor = ({
       dueDate: data.dueDate,
     };
     onSubmit(draft);
-
-    setFocus("title");
-
-    // clear the form
-    reset();
   };
+
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      setFocus("title");
+      reset();
+    }
+  }, [isSubmitSuccessful, reset, setFocus]);
 
   return (
     <form
