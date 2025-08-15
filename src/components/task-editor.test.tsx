@@ -2,7 +2,8 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TaskEditor } from "./task-editor";
 import { vi } from "vitest";
-import { addDays, format, startOfDay } from "date-fns";
+import { addDays, startOfDay } from "date-fns";
+import { formatDueDateData, parsedDueDateData } from "@/lib/utils";
 
 describe("TaskEditor", () => {
   it("renders inputs and submit button", () => {
@@ -89,10 +90,8 @@ describe("TaskEditor", () => {
     expect(submitted.title).toBe("Task with due date 1234");
     expect(submitted.status).toBe("todo");
     // ensure it parses to the selected day
-    const submittedDate = new Date(submitted.dueDate);
-    expect(format(submittedDate, "yyyy-MM-dd")).toBe(
-      format(target, "yyyy-MM-dd")
-    );
+    const submittedDate = parsedDueDateData(submitted.dueDate);
+    expect(formatDueDateData(submittedDate)).toBe(formatDueDateData(target));
   });
 
   it("shows default values and Cancel/Save in edit variant", async () => {

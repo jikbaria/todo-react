@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 import { createTask } from "./test/utils";
-import { formatDueDate } from "./lib/utils";
+import { formatDueDateData, formatDueDateDisplay } from "./lib/utils";
 import { addDays, startOfDay, subDays } from "date-fns";
 import { seedTasks } from "./test/mocks/db";
 
@@ -76,11 +76,11 @@ describe("App", () => {
 
     const overdue = createTask({
       title: "Overdue",
-      dueDate: subDays(startOfDay(baseNow), 3).toISOString(),
+      dueDate: formatDueDateData(subDays(startOfDay(baseNow), 3)),
     });
     const future = createTask({
       title: "Future",
-      dueDate: addDays(startOfDay(baseNow), 21).toISOString(),
+      dueDate: formatDueDateData(addDays(startOfDay(baseNow), 21)),
     });
     seedTasks([overdue, future]);
 
@@ -91,12 +91,14 @@ describe("App", () => {
 
     // Overdue
     expect(screen.getByText("Overdue")).toBeInTheDocument();
-    const overdueLabel = screen.getByText(formatDueDate(overdue.dueDate!));
+    const overdueLabel = screen.getByText(
+      formatDueDateDisplay(overdue.dueDate!)
+    );
     expect(overdueLabel).toHaveAttribute("data-overdue", "true");
 
     // Future
     expect(screen.getByText("Future")).toBeInTheDocument();
-    const futureLabel = screen.getByText(formatDueDate(future.dueDate!));
+    const futureLabel = screen.getByText(formatDueDateDisplay(future.dueDate!));
     expect(futureLabel).toHaveAttribute("data-overdue", "false");
   });
 

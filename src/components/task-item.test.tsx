@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { TaskItem } from "./task-item";
 import type { Task } from "@/types/task";
 import { createTask } from "@/test/utils";
-import { formatDueDate } from "@/lib/utils";
+import { formatDueDateData, formatDueDateDisplay } from "@/lib/utils";
 import { vi } from "vitest";
 import { addDays, startOfDay, subDays } from "date-fns";
 
@@ -112,7 +112,7 @@ describe("TaskItem", () => {
 
     const futureDate = addDays(startOfDay(baseNow), 6);
 
-    const dueDate = futureDate.toISOString();
+    const dueDate = formatDueDateData(futureDate);
     const task = createTask({ dueDate, title: "Has due date" });
 
     render(
@@ -124,14 +124,14 @@ describe("TaskItem", () => {
       />
     );
 
-    const expectedLabel = formatDueDate(dueDate);
+    const expectedLabel = formatDueDateDisplay(dueDate);
     expect(screen.getByText(expectedLabel)).toBeInTheDocument();
   });
 
   it("marks task as overdue when due date is in the past", () => {
     const baseNow = new Date();
 
-    const pastDue = subDays(startOfDay(baseNow), 1).toISOString();
+    const pastDue = formatDueDateData(subDays(startOfDay(baseNow), 1));
     const task = createTask({ dueDate: pastDue, title: "Overdue task" });
 
     render(
@@ -143,14 +143,14 @@ describe("TaskItem", () => {
       />
     );
 
-    const label = screen.getByText(formatDueDate(pastDue));
+    const label = screen.getByText(formatDueDateDisplay(pastDue));
     expect(label).toHaveAttribute("data-overdue", "true");
   });
 
   it("does not mark task as overdue for today or future dates", () => {
     const baseNow = new Date();
 
-    const futureDue = addDays(startOfDay(baseNow), 30).toISOString();
+    const futureDue = formatDueDateData(addDays(startOfDay(baseNow), 30));
     const task = createTask({ dueDate: futureDue, title: "Future task" });
 
     render(
@@ -162,7 +162,7 @@ describe("TaskItem", () => {
       />
     );
 
-    const label = screen.getByText(formatDueDate(futureDue));
+    const label = screen.getByText(formatDueDateDisplay(futureDue));
     expect(label).toHaveAttribute("data-overdue", "false");
   });
 
