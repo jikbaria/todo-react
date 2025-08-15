@@ -50,18 +50,18 @@ const TaskItem = ({
         }}
         aria-label="Mark as completed"
       />
-      <div className="flex gap-2 flex-1">
-        <div className="flex flex-1 flex-col gap-2">
+      <div className="flex gap-2 flex-1 min-w-0">
+        <div className="flex flex-1 flex-col gap-2 min-w-0">
           <div
             className={cn(
-              "text-lg font-semibold",
+              "text-lg font-semibold break-words line-clamp-4",
               task.status === "done" && "line-through"
             )}
           >
             {task.title}
           </div>
           {!!task.description && (
-            <div className="text-sm text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">
+            <div className="text-sm text-gray-500 truncate ">
               {task.description}
             </div>
           )}

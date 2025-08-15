@@ -1,7 +1,11 @@
-import { useRef, useState } from "react";
 import { Button } from "./ui/button";
 import type { TaskDraft } from "@/types/task";
+import { Controller, useForm } from "react-hook-form";
 import { DueDatePicker } from "./due-date-picker";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormMessage } from "./ui/form-message";
+import { TextArea } from "./ui/textarea";
 
 type BaseProps = {
   onSubmit: (draft: TaskDraft) => void;
@@ -16,89 +20,110 @@ type EditProps = BaseProps & {
   onCancel: () => void;
 };
 type Props = AddProps | EditProps;
+
+const FormSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(10, {
+      message: "Title must be at least 10 characters.",
+    })
+    .max(200, {
+      message: "Title must not be longer than 200 characters.",
+    }),
+  description: z.string().max(10000, {
+    message: "Description must not be longer than 10000 characters.",
+  }),
+  dueDate: z.string().nullable(),
+});
+
 const TaskEditor = ({
   onSubmit,
   variant = "add",
   onCancel,
-  defaultValues = {},
+  defaultValues = {
+    description: "",
+    title: "",
+    dueDate: null,
+  },
 }: Props) => {
-  const titleRef = useRef<HTMLTextAreaElement>(null);
-  const [dueDate, setDueDate] = useState<string | null>(
-    defaultValues.dueDate ?? null
-  );
+  const {
+    handleSubmit,
+    reset,
+    control,
+    register,
+    setFocus,
+    formState: { errors },
+  } = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues,
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
+  const handleTaskSubmit = (data: z.infer<typeof FormSchema>) => {
     const draft: TaskDraft = {
-      title,
-      description: description ?? "",
+      title: data.title,
+      description: data.description,
       status: "todo",
-      dueDate: dueDate,
+      dueDate: data.dueDate,
     };
-
     onSubmit(draft);
 
     // clear the form
-    form.reset();
+    reset();
+    setFocus("title");
+  };
 
-    titleRef.current!.focus();
-    autoResize(titleRef.current!);
-  };
-  const autoResize = (el: HTMLTextAreaElement) => {
-    el.style.height = "auto"; // Reset height to recalculate
-    el.style.height = el.scrollHeight + "px";
-  };
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(handleTaskSubmit)}
       className="flex w-full flex-col gap-4 rounded-md border border-gray-300 p-3 focus-within:border-gray-400"
     >
       <div className="flex flex-col">
-        <textarea
+        <TextArea
+          {...register("title")}
           name="title"
           rows={1}
           defaultValue={defaultValues.title}
           aria-label="Title"
-          required
-          ref={(ref) => {
-            if (ref) {
-              autoResize(ref);
-            }
-            titleRef.current = ref;
-          }}
-          onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
           autoFocus
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              // trigger the submit event using form element
-              const form = e.currentTarget.form;
-              if (form) {
-                form.requestSubmit();
-              }
+              handleSubmit(handleTaskSubmit)();
             }
           }}
-          minLength={10}
-          maxLength={1024}
+          maxLength={200}
           placeholder="Title"
-          className="resize-none text-base font-semibold text-primary outline-none placeholder:text-muted-foreground"
+          className="font-semibold"
         />
-        <textarea
+        {errors.title?.message && (
+          <FormMessage>{errors.title?.message}</FormMessage>
+        )}
+        <TextArea
+          {...register("description")}
           defaultValue={defaultValues.description}
-          onInput={(e) => autoResize(e.target as HTMLTextAreaElement)}
-          name="description"
           rows={1}
           aria-label="Description"
           placeholder="Description"
-          className="resize-none text-base text-primary outline-none placeholder:text-muted-foreground"
         />
+        {errors.description?.message && (
+          <FormMessage>{errors.description?.message}</FormMessage>
+        )}
       </div>
       <div className="flex justify-between">
-        <DueDatePicker value={dueDate} onChange={setDueDate} />
+        <Controller
+          name="dueDate"
+          control={control}
+          render={({ field }) => (
+            <>
+              <DueDatePicker value={field.value} onChange={field.onChange} />
+              {errors.dueDate?.message && (
+                <FormMessage>{errors.dueDate?.message}</FormMessage>
+              )}
+            </>
+          )}
+        />
+
         <div className="flex gap-2">
           {variant === "edit" && (
             <Button type="button" variant="secondary" onClick={onCancel}>
