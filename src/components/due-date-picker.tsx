@@ -40,7 +40,7 @@ export function DueDatePicker({
           <span>{formatDueDateDisplay(value)}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-2" align="end">
+      <PopoverContent className="w-auto p-2" align="start">
         <div className="flex flex-col gap-2">
           <Calendar
             mode="single"

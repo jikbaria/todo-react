@@ -76,7 +76,7 @@ const TaskEditor = ({
       onSubmit={handleSubmit(handleTaskSubmit)}
       className="flex w-full flex-col gap-4 rounded-md border border-gray-300 p-3 focus-within:border-gray-400"
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-0.5">
         <TextArea
           {...register("title")}
           name="title"
