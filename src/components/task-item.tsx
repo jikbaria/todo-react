@@ -1,4 +1,4 @@
-import { cn, formatDueDate } from "@/lib/utils";
+import { cn, formatDueDateDisplay } from "@/lib/utils";
 import { Checkbox } from "./ui/checkbox";
 import type { Task } from "@/types/task";
 import { CalendarIcon, Trash2 } from "lucide-react";
@@ -81,7 +81,7 @@ const TaskItem = ({
                   }
                 >
                   <CalendarIcon className="size-3" />
-                  {formatDueDate(dueDate)}
+                  {formatDueDateDisplay(dueDate)}
                 </div>
               )}
             </FreshDate>

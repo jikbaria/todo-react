@@ -68,9 +68,10 @@ const TaskEditor = ({
     };
     onSubmit(draft);
 
+    setFocus("title");
+
     // clear the form
     reset();
-    setFocus("title");
   };
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { isBefore, startOfDay, format } from "date-fns";
+import { isBefore, startOfDay } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn, formatDueDate } from "@/lib/utils";
+import {
+  cn,
+  formatDueDateDisplay,
+  formatDueDateData,
+  parsedDueDateData,
+} from "@/lib/utils";
 
 export function DueDatePicker({
   value,
@@ -32,22 +37,22 @@ export function DueDatePicker({
           className={cn(value === null && "text-gray-600")}
         >
           <CalendarIcon className="size-4" />
-          <span>{formatDueDate(value)}</span>
+          <span>{formatDueDateDisplay(value)}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-2" align="end">
         <div className="flex flex-col gap-2">
           <Calendar
             mode="single"
-            defaultMonth={value ? new Date(value) : undefined}
-            selected={value ? new Date(value) : undefined}
+            defaultMonth={value ? parsedDueDateData(value) : undefined}
+            selected={value ? parsedDueDateData(value) : undefined}
             captionLayout="label"
             disabled={(date) => {
               return isBefore(date, startOfDay(new Date()));
             }}
             startMonth={new Date()}
             onSelect={(date) => {
-              onChange(date ? format(date, "yyyy-MM-dd") : null);
+              onChange(date ? formatDueDateData(date) : null);
               setOpen(false);
             }}
           />
